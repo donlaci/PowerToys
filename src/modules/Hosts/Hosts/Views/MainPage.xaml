@@ -328,9 +328,7 @@
             <ContentDialog.DataContext>
                 <models:Entry />
             </ContentDialog.DataContext>
-            <ScrollViewer
-                HorizontalScrollBarVisibility="Auto"
-                HorizontalScrollMode="Auto">
+            <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto" Name="EntryDialogBasePanel">
                 <StackPanel
                     MinWidth="480"
                     Margin="0,12,0,0"
