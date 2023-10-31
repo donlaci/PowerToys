@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Windows.Threading;
+using AllExperiments;
 using global::PowerToys.GPOWrapper;
 using Microsoft.PowerToys.Settings.UI.Library;
 using Microsoft.PowerToys.Settings.UI.Library.Helpers;
@@ -379,6 +380,11 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             UpdateAvailable = updatingSettingsConfig != null && (updatingSettingsConfig.State == UpdatingSettings.UpdatingState.ReadyToInstall || updatingSettingsConfig.State == UpdatingSettings.UpdatingState.ReadyToDownload);
         }
 
+        ~DashboardViewModel()
+        {
+            generalSettingsConfig.RemoveEnabledModuleChangeNotification();
+        }
+
         private void LoadKBMSettingsFromJson()
         {
             KeyboardManagerProfile kbmProfile = GetKBMProfile();
@@ -461,52 +467,59 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
 
         public void ModuleEnabledChangedOnSettingsPage()
         {
-            ActiveModules.Clear();
-            DisabledModules.Clear();
-            generalSettingsConfig = _settingsRepository.SettingsConfig;
-            foreach (DashboardListItem item in _allModules)
+            try
             {
-                switch (item.Tag)
+                ActiveModules.Clear();
+                DisabledModules.Clear();
+                generalSettingsConfig = _settingsRepository.SettingsConfig;
+                foreach (DashboardListItem item in _allModules)
                 {
-                    case "AlwaysOnTop": item.IsEnabled = generalSettingsConfig.Enabled.AlwaysOnTop; break;
-                    case "Awake": item.IsEnabled = generalSettingsConfig.Enabled.Awake; break;
-                    case "ColorPicker": item.IsEnabled = generalSettingsConfig.Enabled.ColorPicker; break;
-                    case "CropAndLock": item.IsEnabled = generalSettingsConfig.Enabled.CropAndLock; break;
-                    case "EnvironmentVariables": item.IsEnabled = generalSettingsConfig.Enabled.EnvironmentVariables; break;
-                    case "FancyZones": item.IsEnabled = generalSettingsConfig.Enabled.FancyZones; break;
-                    case "FileLocksmith": item.IsEnabled = generalSettingsConfig.Enabled.FileLocksmith; break;
-                    case "FindMyMouse": item.IsEnabled = generalSettingsConfig.Enabled.FindMyMouse; break;
-                    case "Hosts": item.IsEnabled = generalSettingsConfig.Enabled.Hosts; break;
-                    case "ImageResizer": item.IsEnabled = generalSettingsConfig.Enabled.ImageResizer; break;
-                    case "KeyboardManager": item.IsEnabled = generalSettingsConfig.Enabled.KeyboardManager; break;
-                    case "MouseHighlighter": item.IsEnabled = generalSettingsConfig.Enabled.MouseHighlighter; break;
-                    case "MouseJump": item.IsEnabled = generalSettingsConfig.Enabled.MouseJump; break;
-                    case "MousePointerCrosshairs": item.IsEnabled = generalSettingsConfig.Enabled.MousePointerCrosshairs; break;
-                    case "MouseWithoutBorders": item.IsEnabled = generalSettingsConfig.Enabled.MouseWithoutBorders; break;
-                    case "PastePlain": item.IsEnabled = generalSettingsConfig.Enabled.PastePlain; break;
-                    case "Peek": item.IsEnabled = generalSettingsConfig.Enabled.Peek; break;
-                    case "PowerRename": item.IsEnabled = generalSettingsConfig.Enabled.PowerRename; break;
-                    case "PowerLauncher": item.IsEnabled = generalSettingsConfig.Enabled.PowerLauncher; break;
-                    case "PowerAccent": item.IsEnabled = generalSettingsConfig.Enabled.PowerAccent; break;
-                    case "RegistryPreview": item.IsEnabled = generalSettingsConfig.Enabled.RegistryPreview; break;
-                    case "MeasureTool": item.IsEnabled = generalSettingsConfig.Enabled.MeasureTool; break;
-                    case "ShortcutGuide": item.IsEnabled = generalSettingsConfig.Enabled.ShortcutGuide; break;
-                    case "PowerOCR": item.IsEnabled = generalSettingsConfig.Enabled.PowerOCR; break;
-                    case "VideoConference": item.IsEnabled = generalSettingsConfig.Enabled.VideoConference; break;
+                    switch (item.Tag)
+                    {
+                        case "AlwaysOnTop": item.IsEnabled = generalSettingsConfig.Enabled.AlwaysOnTop; break;
+                        case "Awake": item.IsEnabled = generalSettingsConfig.Enabled.Awake; break;
+                        case "ColorPicker": item.IsEnabled = generalSettingsConfig.Enabled.ColorPicker; break;
+                        case "CropAndLock": item.IsEnabled = generalSettingsConfig.Enabled.CropAndLock; break;
+                        case "EnvironmentVariables": item.IsEnabled = generalSettingsConfig.Enabled.EnvironmentVariables; break;
+                        case "FancyZones": item.IsEnabled = generalSettingsConfig.Enabled.FancyZones; break;
+                        case "FileLocksmith": item.IsEnabled = generalSettingsConfig.Enabled.FileLocksmith; break;
+                        case "FindMyMouse": item.IsEnabled = generalSettingsConfig.Enabled.FindMyMouse; break;
+                        case "Hosts": item.IsEnabled = generalSettingsConfig.Enabled.Hosts; break;
+                        case "ImageResizer": item.IsEnabled = generalSettingsConfig.Enabled.ImageResizer; break;
+                        case "KeyboardManager": item.IsEnabled = generalSettingsConfig.Enabled.KeyboardManager; break;
+                        case "MouseHighlighter": item.IsEnabled = generalSettingsConfig.Enabled.MouseHighlighter; break;
+                        case "MouseJump": item.IsEnabled = generalSettingsConfig.Enabled.MouseJump; break;
+                        case "MousePointerCrosshairs": item.IsEnabled = generalSettingsConfig.Enabled.MousePointerCrosshairs; break;
+                        case "MouseWithoutBorders": item.IsEnabled = generalSettingsConfig.Enabled.MouseWithoutBorders; break;
+                        case "PastePlain": item.IsEnabled = generalSettingsConfig.Enabled.PastePlain; break;
+                        case "Peek": item.IsEnabled = generalSettingsConfig.Enabled.Peek; break;
+                        case "PowerRename": item.IsEnabled = generalSettingsConfig.Enabled.PowerRename; break;
+                        case "PowerLauncher": item.IsEnabled = generalSettingsConfig.Enabled.PowerLauncher; break;
+                        case "PowerAccent": item.IsEnabled = generalSettingsConfig.Enabled.PowerAccent; break;
+                        case "RegistryPreview": item.IsEnabled = generalSettingsConfig.Enabled.RegistryPreview; break;
+                        case "MeasureTool": item.IsEnabled = generalSettingsConfig.Enabled.MeasureTool; break;
+                        case "ShortcutGuide": item.IsEnabled = generalSettingsConfig.Enabled.ShortcutGuide; break;
+                        case "PowerOCR": item.IsEnabled = generalSettingsConfig.Enabled.PowerOCR; break;
+                        case "VideoConference": item.IsEnabled = generalSettingsConfig.Enabled.VideoConference; break;
+                    }
+
+                    if (item.IsEnabled)
+                    {
+                        ActiveModules.Add(item);
+                    }
+                    else
+                    {
+                        DisabledModules.Add(item);
+                    }
                 }
 
-                if (item.IsEnabled)
-                {
-                    ActiveModules.Add(item);
-                }
-                else
-                {
-                    DisabledModules.Add(item);
-                }
+                OnPropertyChanged(nameof(ActiveModules));
+                OnPropertyChanged(nameof(DisabledModules));
             }
-
-            OnPropertyChanged(nameof(ActiveModules));
-            OnPropertyChanged(nameof(DisabledModules));
+            catch (Exception)
+            {
+                Logger.LogError("What a pity");
+            }
         }
 
         private ObservableCollection<DashboardModuleItem> GetModuleItemsAlwaysOnTop()

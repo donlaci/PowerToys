@@ -63,6 +63,11 @@ namespace Microsoft.PowerToys.Settings.UI.ViewModels
             SendConfigMSG = ipcMSGCallBackFunc;
         }
 
+        ~AllAppsViewModel()
+        {
+            generalSettingsConfig.RemoveEnabledModuleChangeNotification();
+        }
+
         private void AddFlyoutMenuItem(string moduleName, bool isModuleEnabled, string moduleLabelResourceName, string moduleFluentIconName)
         {
             GpoRuleConfigured gpo = GetModuleGpoConfiguration(moduleName);
