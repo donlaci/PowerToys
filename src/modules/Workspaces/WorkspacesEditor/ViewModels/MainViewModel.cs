@@ -480,11 +480,7 @@ namespace WorkspacesEditor.ViewModels
             foreach (var screen in MonitorHelper.GetDpiUnawareScreens())
             {
                 var bounds = screen.Bounds;
-                OverlayWindow overlayWindow = new OverlayWindow();
-                overlayWindow.Top = bounds.Top;
-                overlayWindow.Left = bounds.Left;
-                overlayWindow.Width = bounds.Width;
-                overlayWindow.Height = bounds.Height;
+                OverlayWindow overlayWindow = new OverlayWindow(bounds);
                 overlayWindow.ShowActivated = true;
                 overlayWindow.Topmost = true;
                 overlayWindow.Show();
