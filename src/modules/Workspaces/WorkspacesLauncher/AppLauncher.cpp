@@ -182,36 +182,77 @@ namespace AppLauncher
         return launched;
     }
 
-    bool Launch(WorkspacesData::WorkspacesProject& project, LaunchingStatus& launchingStatus, ErrorList& launchErrors, bool* needAdditionalLaunch)
+    bool Launch(WorkspacesData::WorkspacesProject& project, LaunchingStatus& launchingStatus, ErrorList& launchErrors)
     {
         bool launchedSuccessfully{ true };
 
         auto installedApps = Utils::Apps::GetAppsList();
         UpdatePackagedApps(project.apps, installedApps);
 
-        *needAdditionalLaunch =  false ;
-
         // Launch apps
         for (auto& app : project.apps)
         {
             if (launchingStatus.ExistsSameAppLaunched(app))
             {
-                *needAdditionalLaunch = true;
+                continue;
             }
             else if (launchingStatus.GetStatus(app) == LaunchingState::Waiting)
             {
+                launchingStatus.Update(app, LaunchingState::Launched);
+                Logger::error(L"Launch :: updating state: app {} to Launched", app.name);
+
                 if (!Launch(app, launchErrors))
                 {
                     Logger::error(L"Failed to launch {}", app.name);
                     launchingStatus.Update(app, LaunchingState::Failed);
+                    Logger::error(L"Launch :: updating state: app {} to Failed", app.name);
                     launchedSuccessfully = false;
-                }
-                else
-                {
-                    launchingStatus.Update(app, LaunchingState::Launched);
                 }
             }
         }
         return launchedSuccessfully;
     }
+
+    bool LaunchNextInstance(WorkspacesData::WorkspacesProject& project, LaunchingStatus& launchingStatus, ErrorList& launchErrors, WorkspacesData::WorkspacesProject::Application& appToLaunch)
+    {
+        bool launchedSuccessfully{ true };
+        bool launched{ false };
+        Logger::error(L"LaunchNextInstance {}", appToLaunch.path);
+        
+        // Launch apps
+        for (auto& app : project.apps)
+        {
+            if (app.path != appToLaunch.path)
+            {
+                continue;
+            }
+            else
+            {
+                Logger::error(L"LaunchNextInstance {} status {}", appToLaunch.path, launchingStatus.GetStatus(app));
+                if (launched)
+                {
+                }
+                if (launchingStatus.GetStatus(app) == LaunchingState::Waiting)
+                {
+                    Logger::error(L"LaunchNextInstance launching next");
+                    Logger::error(L"LaunchNextInstance :: updating state: app {} to Launched", app.name);
+                    launchingStatus.Update(app, LaunchingState::Launched);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                    auto installedApps = Utils::Apps::GetAppsList();
+                    UpdatePackagedApps(project.apps, installedApps);
+
+                    if (!Launch(app, launchErrors))
+                    {
+                        Logger::error(L"Failed to launch {}", app.name);
+                        Logger::error(L"LaunchNextInstance :: updating state: app {} to Failed", app.name);
+                        launchingStatus.Update(app, LaunchingState::Failed);
+                        launchedSuccessfully = false;
+                    }
+                    launched = true;
+                }
+            }
+        }
+        return launchedSuccessfully;
+    }
+
 }

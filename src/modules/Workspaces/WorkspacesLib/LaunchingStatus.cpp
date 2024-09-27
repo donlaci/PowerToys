@@ -48,9 +48,36 @@ bool LaunchingStatus::AllLaunched() noexcept
     return true;
 }
 
+void LaunchingStatus::UpdateLaunched(const WorkspacesData::WorkspacesProject::Application& app, LaunchingState state)
+{
+    std::unique_lock lock(m_mutex);
+    Logger::error(L"UpdateLaunched :: trying to update state: app {} to {}", app.name, state);
+    if (!m_appsState.contains(app))
+    {
+        Logger::error(L"Error updating state: app {} is not tracked in the project", app.name);
+        return;
+    }
+
+    for (auto const& [key, val] : m_appsState)
+    {
+        if ((key == app) && (val.state == LaunchingState::Launched))
+        {
+            Logger::error(L"UpdateLaunched :: updating state: app {} to {}", app.name, state);
+            m_appsState[key].state = state;
+            if (m_updateCallback)
+            {
+                m_updateCallback(m_appsState);
+            }
+            return;
+        }
+    }
+    Logger::error(L"UpdateLaunched :: error app not find {}", app.name);
+}
+
 void LaunchingStatus::Update(const WorkspacesData::WorkspacesProject::Application& app, LaunchingState state)
 {
     std::unique_lock lock(m_mutex);
+    Logger::error(L"updating state: app {} from {} to {}", app.name, m_appsState[app].state, state);
     if (!m_appsState.contains(app))
     {
         Logger::error(L"Error updating state: app {} is not tracked in the project", app.name);

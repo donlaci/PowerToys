@@ -20,7 +20,6 @@ Launcher::Launcher(const WorkspacesData::WorkspacesProject& project,
     m_windowArrangerHelper(std::make_unique<WindowArrangerHelper>(std::bind(&Launcher::handleWindowArrangerMessage, this, std::placeholders::_1))),
     m_launchingStatus(m_project, std::bind(&LauncherUIHelper::UpdateLaunchStatus, m_uiHelper.get(), std::placeholders::_1))
 {
-    m_needAdditionalLaunch = false;
     m_uiHelper->LaunchUI();
     m_uiHelper->UpdateLaunchStatus(m_launchingStatus.Get());
 
@@ -90,19 +89,23 @@ Launcher::~Launcher()
     Trace::Workspaces::Launch(m_launchedSuccessfully, m_project, m_invokePoint, duration.count(), differentSetup, m_launchErrors);
 }
 
-bool Launcher::Launch()
+void Launcher::Launch()
 {
     Logger::info(L"Launch Workspace {} : {}", m_project.name, m_project.id);
-    bool needAdditionalLaunch;
-    m_launchedSuccessfully = AppLauncher::Launch(m_project, m_launchingStatus, m_launchErrors, &needAdditionalLaunch);
-    return needAdditionalLaunch;
+    m_launchedSuccessfully = AppLauncher::Launch(m_project, m_launchingStatus, m_launchErrors);
 }
+
+void Launcher::LaunchNextInstance(WorkspacesData::WorkspacesProject::Application& app)
+{
+    m_launchedSuccessfully = AppLauncher::LaunchNextInstance(m_project, m_launchingStatus, m_launchErrors, app);
+}
+
 
 void Launcher::handleWindowArrangerMessage(const std::wstring& msg)
 {
     if (msg == L"ready")
     {
-        m_needAdditionalLaunch = Launch();
+        Launch();
     }
     else
     {
@@ -111,11 +114,8 @@ void Launcher::handleWindowArrangerMessage(const std::wstring& msg)
             auto data = WorkspacesData::AppLaunchInfoJSON::FromJson(json::JsonValue::Parse(msg).GetObjectW());
             if (data.has_value())
             {
-                m_launchingStatus.Update(data.value().application, data.value().state);
-                if (m_needAdditionalLaunch)
-                {
-                    m_needAdditionalLaunch = Launch();
-                }
+                m_launchingStatus.UpdateLaunched(data.value().application, data.value().state);
+                LaunchNextInstance(data.value().application);
             }
             else
             {

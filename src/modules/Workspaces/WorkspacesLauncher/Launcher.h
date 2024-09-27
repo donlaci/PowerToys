@@ -14,7 +14,8 @@ public:
     Launcher(const WorkspacesData::WorkspacesProject& project, std::vector<WorkspacesData::WorkspacesProject>& workspaces, InvokePoint invokePoint);
     ~Launcher();
 
-    bool Launch();
+    void Launch();
+    void LaunchNextInstance(WorkspacesData::WorkspacesProject::Application& app);
 
 private:
     WorkspacesData::WorkspacesProject m_project;
@@ -26,7 +27,6 @@ private:
     LaunchingStatus m_launchingStatus;
     bool m_launchedSuccessfully{};
     std::vector<std::pair<std::wstring, std::wstring>> m_launchErrors{};
-    bool m_needAdditionalLaunch;
 
     void handleWindowArrangerMessage(const std::wstring& msg);
 };

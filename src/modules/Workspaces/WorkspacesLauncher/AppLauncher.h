@@ -12,5 +12,6 @@ namespace AppLauncher
 
     Result<SHELLEXECUTEINFO, std::wstring> LaunchApp(const std::wstring& appPath, const std::wstring& commandLineArgs, bool elevated);
 
-    bool Launch(WorkspacesData::WorkspacesProject& project, LaunchingStatus& launchingStatus, ErrorList& launchErrors, bool* needAdditionalLaunch);
+    bool Launch(WorkspacesData::WorkspacesProject& project, LaunchingStatus& launchingStatus, ErrorList& launchErrors);
+    bool LaunchNextInstance(WorkspacesData::WorkspacesProject& project, LaunchingStatus& launchingStatus, ErrorList& launchErrors, WorkspacesData::WorkspacesProject::Application& appToLaunch);
 }
