@@ -411,7 +411,7 @@ bool WindowArranger::processWindow(HWND window)
     }
     else
     {
-        m_launchingStatus.Update(iter->first, window, LaunchingState::Failed);
+        //m_launchingStatus.Update(iter->first, window, LaunchingState::Failed);
     }
 
     auto state = m_launchingStatus.Get(iter->first);
@@ -456,10 +456,25 @@ bool WindowArranger::moveWindow(HWND window, const WorkspacesData::WorkspacesPro
     rect.right = static_cast<long>(std::round(rect.right * mult));
     rect.top = static_cast<long>(std::round(rect.top * mult));
     rect.bottom = static_cast<long>(std::round(rect.bottom * mult));
+    Logger::trace(L"!!! NL Target {} to ({},{}) [{}x{}]", app.name, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
 
     if (PlacementHelper::SizeWindowToRect(window, currentMonitor, launchMinimized, launchMaximized, rect))
     {
         WorkspacesWindowProperties::StampWorkspacesLaunchedProperty(window);
+        WINDOWPLACEMENT placement{};
+        ::GetWindowPlacement(window, &placement);
+
+        if ((rect.left != placement.rcNormalPosition.left) || (rect.top != placement.rcNormalPosition.top))
+        {
+            Logger::trace(L"!!! NL got pos {} to ({},{}) [{}x{}]", app.name, placement.rcNormalPosition.left, placement.rcNormalPosition.top, placement.rcNormalPosition.right - placement.rcNormalPosition.left, placement.rcNormalPosition.bottom - placement.rcNormalPosition.top);
+            return false;
+            ////std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+            ////PlacementHelper::SizeWindowToRect(window, currentMonitor, launchMinimized, launchMaximized, rect);
+            ////WINDOWPLACEMENT placement{};
+            ////::GetWindowPlacement(window, &placement);
+        }
+
         Logger::trace(L"Placed {} to ({},{}) [{}x{}]", app.name, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
         return true;
     }
