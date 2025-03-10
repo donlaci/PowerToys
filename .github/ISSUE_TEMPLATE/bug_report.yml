@@ -33,7 +33,7 @@ body:
   validations:
     required: true
 
-- id: version
+- id: isAdmin
   type: dropdown
   attributes:
     label: Running as admin
