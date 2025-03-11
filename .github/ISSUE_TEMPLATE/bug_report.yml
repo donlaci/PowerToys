@@ -16,7 +16,8 @@ body:
   validations:
     required: true
 
-- type: dropdown
+- id: installed
+  type: dropdown
   attributes:
     label: Installation method
     description: How / Where was PowerToys installed from?
