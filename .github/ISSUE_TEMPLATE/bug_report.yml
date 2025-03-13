@@ -34,7 +34,7 @@ body:
   validations:
     required: true
 
-- id: isadmin
+- id: iselevated
   type: dropdown
   attributes:
     label: Running as admin
